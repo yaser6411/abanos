@@ -26,3 +26,25 @@ class ProductOut(ProductBase):
     vendor: Optional[VendorOut] = None
     class Config:
         orm_mode = True
+
+# User schemas
+class UserCreate(BaseModel):
+    full_name: str
+    phone_number: str
+    password: str
+
+class UserOut(BaseModel):
+    id: int
+    full_name: str
+    phone_number: str
+    is_verified: bool
+    class Config:
+        orm_mode = True
+
+# Auth token schemas
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    phone_number: Optional[str] = None

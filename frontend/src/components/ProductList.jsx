@@ -6,9 +6,7 @@ export default function ProductList() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // The backend currently exposes `/db-check` and `/` endpoints.
-    // This fetch demonstrates connectivity; later you can point to /api/products.
-    async function check() {
+    async function fetchData() {
       setLoading(true)
       try {
         const res = await fetch('/db-check')
@@ -18,16 +16,22 @@ export default function ProductList() {
         setDbStatus({ database: 'failed', error: err.message })
       }
 
-      // demo/mock products while backend product endpoints are implemented
-      setProducts([
-        { id: 1, name: 'Sample Product A', price: 9.99, vendor: 'Vendor X' },
-        { id: 2, name: 'Sample Product B', price: 19.99, vendor: 'Vendor Y' }
-      ])
+      try {
+        const r = await fetch('/api/products')
+        if (r.ok) {
+          const prods = await r.json()
+          setProducts(prods)
+        } else {
+          // keep demo products if API not ready
+        }
+      } catch (err) {
+        // ignore
+      }
 
       setLoading(false)
     }
 
-    check()
+    fetchData()
   }, [])
 
   if (loading) return <div className="panel">Loading...</div>
@@ -37,17 +41,21 @@ export default function ProductList() {
       <h2>Database status</h2>
       <pre className="status">{JSON.stringify(dbStatus, null, 2)}</pre>
 
-      <h2>Products (demo)</h2>
-      <ul className="products">
-        {products.map(p => (
-          <li key={p.id} className="product">
-            <div className="product-name">{p.name}</div>
-            <div className="product-meta">{p.vendor} • ${p.price.toFixed(2)}</div>
-          </li>
-        ))}
-      </ul>
+      <h2>Products</h2>
+      {products.length === 0 ? (
+        <p>No products found. You can add a product with the API.</p>
+      ) : (
+        <ul className="products">
+          {products.map(p => (
+            <li key={p.id} className="product">
+              <div className="product-name">{p.name}</div>
+              <div className="product-meta">{p.vendor ? p.vendor.name : 'Unknown'} • ${p.price.toFixed(2)}</div>
+            </li>
+          ))}
+        </ul>
+      )}
 
-      <p className="note">Note: product endpoints are not implemented yet — this view uses mock data for now.</p>
+      <p className="note">Note: use the backend API to add vendors and products.</p>
     </div>
   )
 }

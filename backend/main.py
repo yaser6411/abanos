@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.database import engine, Base
 import backend.models  # ensure models are imported so SQLAlchemy sees them
-from backend.routers import products
+from backend.routers import products_router, auth_router
 
 app = FastAPI(title="Abanos API")
 
@@ -33,4 +33,5 @@ def db_check():
         return {"database": "failed", "error": str(e)}
 
 # API routers
-app.include_router(products.router, prefix="/api")
+app.include_router(products_router, prefix="/api")
+app.include_router(auth_router, prefix="/auth")
