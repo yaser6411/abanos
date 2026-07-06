@@ -1,10 +1,22 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-DATABASE_URL = "postgresql://abanos_user:V4lE2IwW152vA0c8JxnUMyA7HMp8OfnC@dpg-d90gp79o3t8c73c8d660-a.oregon-postgres.render.com/abanos"
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./abanos.db")
 
-engine = create_engine(DATABASE_URL)
+# Use sqlite connect_args when using sqlite for local development
+if DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+else:
+    engine = create_engine(DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
 Base = declarative_base()
+
+# Dependency for FastAPI routes
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
